@@ -16,7 +16,12 @@ static constexpr float TRAIN_SET_RATIO = .7f;
 std::vector<FaceImage> loadDataSet(std::string_view const& datasetDirectoryPath)
 {
     for (auto&& entry : std::filesystem::directory_iterator(datasetDirectoryPath))
+    {
+        if (!entry.is_regular_file())
+            continue;
+
         std::cout << entry.path().u8string() << '\n';
+    }
 
     return {};
 }
