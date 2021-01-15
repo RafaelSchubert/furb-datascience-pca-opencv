@@ -1,11 +1,11 @@
 #include <filesystem>
-#include <iostream>
 #include <list>
 #include <regex>
 #include <string>
 #include <vector>
 
-#include <opencv2/core/mat.hpp>
+#include <opencv2/core.hpp>
+#include <opencv2/imgcodecs.hpp>
 
 #include "FaceImage.h"
 
@@ -61,8 +61,16 @@ FaceImage getFaceImageData(std::filesystem::path const& imageFilePath)
         return {};
     }
 
+    auto imageData = cv::imread(
+            imageFilePath.string(),
+            cv::ImreadModes::IMREAD_GRAYSCALE
+        );
+
+    if (imageData.empty())
+        return {};
+
     return FaceImage{
-            {},
+            std::move(imageData),
             std::stoul(fileNameMatching[1]),
             std::stoul(fileNameMatching[2])
         };
