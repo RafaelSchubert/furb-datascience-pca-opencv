@@ -1,5 +1,6 @@
 #include <filesystem>
 #include <iostream>
+#include <list>
 #include <regex>
 #include <string>
 #include <vector>
@@ -13,14 +14,16 @@ static constexpr char  DATA_SET_PATH[] = R"(C:\Users\Rafael\Pictures\)";
 static constexpr float TRAIN_SET_RATIO = .7f;
 
 
-std::vector<FaceImage> loadDataSet(std::string_view const& datasetDirectoryPath)
+std::list<std::string> getDataSetFilesPaths(std::string_view const& dataSetDirectoryPath)
 {
     static std::regex const reExpectedFileExtensions{
             R"(^\.j(?:p(?:eg|e|g)|fif?)$)",
             std::regex_constants::ECMAScript | std::regex_constants::icase
         };
 
-    for (auto&& entry : std::filesystem::directory_iterator(datasetDirectoryPath))
+    std::list<std::string> dataSetFilesPaths;
+
+    for (auto&& entry : std::filesystem::directory_iterator(dataSetDirectoryPath))
     {
         if (!entry.is_regular_file())
             continue;
@@ -33,8 +36,16 @@ std::vector<FaceImage> loadDataSet(std::string_view const& datasetDirectoryPath)
             continue;
         }
 
-        std::cout << entry.path().u8string() << '\n';
+        dataSetFilesPaths.emplace_back(entry.path().u8string());
     }
+
+    return dataSetFilesPaths;
+}
+
+
+std::vector<FaceImage> loadDataSet(std::string_view const& dataSetDirectoryPath)
+{
+    auto&& dataSetFilesPaths = getDataSetFilesPaths(dataSetDirectoryPath);
 
     return {};
 }
