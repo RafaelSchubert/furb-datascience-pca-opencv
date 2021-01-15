@@ -9,16 +9,29 @@
 #include "FaceImage.h"
 
 
-static constexpr char  DATA_SET_PATH[] = R"(C:\)";
+static constexpr char  DATA_SET_PATH[] = R"(C:\Users\Rafael\Pictures\)";
 static constexpr float TRAIN_SET_RATIO = .7f;
 
 
 std::vector<FaceImage> loadDataSet(std::string_view const& datasetDirectoryPath)
 {
+    static std::regex const reExpectedFileExtensions{
+            R"(^\.j(?:p(?:eg|e|g)|fif?)$)",
+            std::regex_constants::ECMAScript | std::regex_constants::icase
+        };
+
     for (auto&& entry : std::filesystem::directory_iterator(datasetDirectoryPath))
     {
         if (!entry.is_regular_file())
             continue;
+
+        if (!std::regex_match(
+                entry.path().extension().u8string(),
+                reExpectedFileExtensions
+            ))
+        {
+            continue;
+        }
 
         std::cout << entry.path().u8string() << '\n';
     }
