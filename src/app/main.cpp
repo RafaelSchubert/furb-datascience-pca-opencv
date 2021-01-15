@@ -1,3 +1,6 @@
+#include <filesystem>
+#include <iostream>
+#include <regex>
 #include <string>
 #include <vector>
 
@@ -6,12 +9,15 @@
 #include "FaceImage.h"
 
 
-static constexpr char  DATA_SET_PATH[] = "";
+static constexpr char  DATA_SET_PATH[] = R"(C:\)";
 static constexpr float TRAIN_SET_RATIO = .7f;
 
 
 std::vector<FaceImage> loadDataSet(std::string_view const& datasetDirectoryPath)
 {
+    for (auto&& entry : std::filesystem::directory_iterator(datasetDirectoryPath))
+        std::cout << entry.path().u8string() << '\n';
+
     return {};
 }
 
