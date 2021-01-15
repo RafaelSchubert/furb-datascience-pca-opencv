@@ -14,7 +14,7 @@ static constexpr char  DATA_SET_PATH[] = R"(C:\Users\Rafael\Pictures\)";
 static constexpr float TRAIN_SET_RATIO = .7f;
 
 
-std::list<std::filesystem::path> getDataSetFilesPaths(std::string_view const& dataSetDirectoryPath)
+std::list<std::filesystem::path> getDataSetFilesPaths(std::filesystem::path const& dataSetDirectoryPath)
 {
     static std::regex const reExpectedFileExtensions{
             R"(^\.j(?:p(?:eg|e|g)|fif?)$)",
@@ -51,7 +51,7 @@ FaceImage getFaceImageData(std::filesystem::path const& imageFilePath)
 }
 
 
-std::vector<FaceImage> loadDataSet(std::string_view const& dataSetDirectoryPath)
+std::vector<FaceImage> loadDataSet(std::filesystem::path const& dataSetDirectoryPath)
 {
     auto&& dataSetFilesPaths = getDataSetFilesPaths(dataSetDirectoryPath);
 
