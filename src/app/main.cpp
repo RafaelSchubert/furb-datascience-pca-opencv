@@ -14,36 +14,38 @@ static constexpr char  DATA_SET_PATH[] = R"(C:\Users\Rafael\Pictures\)";
 static constexpr float TRAIN_SET_RATIO = .7f;
 
 
-std::list<std::string> getDataSetFilesPaths(std::string_view const& dataSetDirectoryPath)
+std::list<std::filesystem::path> getDataSetFilesPaths(std::string_view const& dataSetDirectoryPath)
 {
     static std::regex const reExpectedFileExtensions{
             R"(^\.j(?:p(?:eg|e|g)|fif?)$)",
             std::regex_constants::ECMAScript | std::regex_constants::icase
         };
 
-    std::list<std::string> dataSetFilesPaths;
+    std::list<std::filesystem::path> dataSetFilesPaths;
 
     for (auto&& entry : std::filesystem::directory_iterator(dataSetDirectoryPath))
     {
         if (!entry.is_regular_file())
             continue;
 
+        auto&& entryPath = entry.path();
+
         if (!std::regex_match(
-                entry.path().extension().u8string(),
+                entryPath.extension().u8string(),
                 reExpectedFileExtensions
             ))
         {
             continue;
         }
 
-        dataSetFilesPaths.emplace_back(entry.path().u8string());
+        dataSetFilesPaths.push_back(entryPath);
     }
 
     return dataSetFilesPaths;
 }
 
 
-FaceImage getFaceImageData(std::string const& imageFilePath)
+FaceImage getFaceImageData(std::filesystem::path const& imageFilePath)
 {
     return {};
 }
