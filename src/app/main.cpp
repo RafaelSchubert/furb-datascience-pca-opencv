@@ -17,7 +17,7 @@ static constexpr float TRAIN_SET_RATIO = .7f;
 std::list<std::filesystem::path> getDataSetFilesPaths(std::filesystem::path const& dataSetDirectoryPath)
 {
     static std::regex const reExpectedFileExtensions{
-            R"(^\d{1,}_\d{1,}\.j(?:p(?:eg|e|g)|fif?)$)",
+            R"(^\d+_\d+\.j(?:p(?:eg|e|g)|fif?)$)",
             std::regex_constants::ECMAScript | std::regex_constants::icase
         };
 
@@ -31,7 +31,7 @@ std::list<std::filesystem::path> getDataSetFilesPaths(std::filesystem::path cons
         auto&& entryPath = entry.path();
 
         if (!std::regex_match(
-                entryPath.filename().u8string(),
+                entryPath.filename().string(),
                 reExpectedFileExtensions
             ))
         {
@@ -47,7 +47,25 @@ std::list<std::filesystem::path> getDataSetFilesPaths(std::filesystem::path cons
 
 FaceImage getFaceImageData(std::filesystem::path const& imageFilePath)
 {
-    return {};
+    static std::regex const reFileNameFormat{ R"(^(\d+)_(\d+)\.)" };
+
+    auto const  fileName = imageFilePath.filename().string();
+    std::smatch fileNameMatching;
+
+    if (!std::regex_search(
+            fileName,
+            fileNameMatching,
+            reFileNameFormat
+        ))
+    {
+        return {};
+    }
+
+    return FaceImage{
+            {},
+            std::stoul(fileNameMatching[1]),
+            std::stoul(fileNameMatching[2])
+        };
 }
 
 
