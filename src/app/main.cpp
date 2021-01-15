@@ -43,11 +43,29 @@ std::list<std::string> getDataSetFilesPaths(std::string_view const& dataSetDirec
 }
 
 
+FaceImage getFaceImageData(std::string const& imageFilePath)
+{
+    return {};
+}
+
+
 std::vector<FaceImage> loadDataSet(std::string_view const& dataSetDirectoryPath)
 {
     auto&& dataSetFilesPaths = getDataSetFilesPaths(dataSetDirectoryPath);
 
-    return {};
+    if (empty(dataSetFilesPaths))
+        return {};
+
+    std::vector<FaceImage> dataSetEntries{ size(dataSetFilesPaths) };
+
+    std::transform(
+            begin(dataSetFilesPaths),
+            end(dataSetFilesPaths),
+            begin(dataSetEntries),
+            getFaceImageData
+        );
+
+    return dataSetEntries;
 }
 
 
