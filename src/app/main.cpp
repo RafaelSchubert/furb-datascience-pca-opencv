@@ -10,14 +10,14 @@
 #include "FaceImage.h"
 
 
-static constexpr char  DATA_SET_PATH[] = R"(C:\Users\Rafael\Pictures\)";
+static constexpr char  DATA_SET_PATH[] = R"(C:\Users\Rafael\Pictures\ORL\)";
 static constexpr float TRAIN_SET_RATIO = .7f;
 
 
 std::list<std::filesystem::path> getDataSetFilesPaths(std::filesystem::path const& dataSetDirectoryPath)
 {
     static std::regex const reExpectedFileExtensions{
-            R"(^\.j(?:p(?:eg|e|g)|fif?)$)",
+            R"(^\d{1,}_\d{1,}\.j(?:p(?:eg|e|g)|fif?)$)",
             std::regex_constants::ECMAScript | std::regex_constants::icase
         };
 
@@ -31,7 +31,7 @@ std::list<std::filesystem::path> getDataSetFilesPaths(std::filesystem::path cons
         auto&& entryPath = entry.path();
 
         if (!std::regex_match(
-                entryPath.extension().u8string(),
+                entryPath.filename().u8string(),
                 reExpectedFileExtensions
             ))
         {
