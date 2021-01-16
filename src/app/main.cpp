@@ -45,11 +45,11 @@ std::list<std::filesystem::path> getDataSetFilesPaths(std::filesystem::path cons
 }
 
 
-FaceImage getFaceImageData(std::filesystem::path const& imageFilePath)
+FaceImage readDataSetEntry(std::filesystem::path const& entryFilePath)
 {
     static std::regex const reFileNameFormat{ R"(^(\d+)_(\d+)\.)" };
 
-    auto const  fileName = imageFilePath.filename().string();
+    auto const  fileName = entryFilePath.filename().string();
     std::smatch fileNameMatching;
 
     if (!std::regex_search(
@@ -62,7 +62,7 @@ FaceImage getFaceImageData(std::filesystem::path const& imageFilePath)
     }
 
     auto imageData = cv::imread(
-            imageFilePath.string(),
+            entryFilePath.string(),
             cv::ImreadModes::IMREAD_GRAYSCALE
         );
 
@@ -90,7 +90,7 @@ std::vector<FaceImage> loadDataSet(std::filesystem::path const& dataSetDirectory
             begin(dataSetFilesPaths),
             end(dataSetFilesPaths),
             begin(dataSetEntries),
-            getFaceImageData
+            readDataSetEntry
         );
 
     return dataSetEntries;
