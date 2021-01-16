@@ -168,9 +168,11 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="PCAFaceMatcher.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="FaceImage.h" />
+    <ClInclude Include="PCAFaceMatcher.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
