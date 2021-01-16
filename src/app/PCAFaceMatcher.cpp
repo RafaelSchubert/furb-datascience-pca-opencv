@@ -12,7 +12,7 @@ void PCAFaceMatcher::train(std::vector<std::reference_wrapper<FaceImage>> const&
     if (empty(trainSet))
         return;
 
-    auto&& meanImage = getMeanImage(trainSet);
+    auto meanImage = getMeanImage(trainSet);
 }
 
 

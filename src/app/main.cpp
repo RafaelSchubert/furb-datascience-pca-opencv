@@ -56,7 +56,7 @@ cv::Mat getEntryImageData(std::filesystem::path const& entryFilePath)
     cv::Mat resizedImageData;
 
     {
-        auto&& imageData = cv::imread(
+        auto imageData = cv::imread(
                 entryFilePath.string(),
                 cv::ImreadModes::IMREAD_GRAYSCALE
             );
@@ -102,7 +102,7 @@ FaceImage readDataSetEntry(std::filesystem::path const& entryFilePath)
 
 std::vector<FaceImage> loadDataSet(std::filesystem::path const& dataSetDirectoryPath)
 {
-    auto&& dataSetFilesPaths = getDataSetFilesPaths(dataSetDirectoryPath);
+    auto dataSetFilesPaths = getDataSetFilesPaths(dataSetDirectoryPath);
 
     if (empty(dataSetFilesPaths))
         return {};
@@ -202,9 +202,9 @@ std::pair<
 
 int main()
 {
-    auto&& facesDataSet = loadDataSet(DATA_SET_PATH);
+    auto facesDataSet = loadDataSet(DATA_SET_PATH);
 
-    auto&& [trainSet, testSet] = splitDataSet(facesDataSet, TRAIN_SET_RATIO);
+    auto [trainSet, testSet] = splitDataSet(facesDataSet, TRAIN_SET_RATIO);
 
     PCAFaceMatcher matcher;
 
