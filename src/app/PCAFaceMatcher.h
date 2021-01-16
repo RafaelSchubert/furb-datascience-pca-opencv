@@ -13,6 +13,8 @@ public:
     void predict(std::vector<std::reference_wrapper<FaceImage>> const& dataSet) const;
 
 private:
+    void clear();
+
     cv::Mat getMeanImage(std::vector<std::reference_wrapper<FaceImage>> const& trainSet) const;
 
     cv::Mat getDifferenceMatrix(
@@ -21,6 +23,8 @@ private:
         ) const;
 
 private:
+    cv::Mat m_mean;
+    cv::Mat m_eigenFaces;
     cv::Mat m_projections;
 };
 

@@ -10,17 +10,29 @@
 
 void PCAFaceMatcher::train(std::vector<std::reference_wrapper<FaceImage>> const& trainSet)
 {
+    clear();
+
     if (empty(trainSet))
         return;
+
+    m_mean = getMeanImage(trainSet);
 
     auto [eigenValues, eigenVectors] = eigenDecomposition(
             covarianceMatrix(
                     getDifferenceMatrix(
                             trainSet,
-                            getMeanImage(trainSet)
+                            m_mean
                         )
                 )
         );
+}
+
+
+void PCAFaceMatcher::clear()
+{
+    m_mean        = {};
+    m_eigenFaces  = {};
+    m_projections = {};
 }
 
 
