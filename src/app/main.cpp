@@ -6,10 +6,12 @@
 
 #include <opencv2/core.hpp>
 #include <opencv2/imgcodecs.hpp>
+#include <opencv2/imgproc.hpp>
 
 #include "FaceImage.h"
 
 
+static cv::Size const  IMAGE_SIZE{ 80, 80 };
 static constexpr char  DATA_SET_PATH[] = R"(C:\Users\Rafael\Pictures\ORL\)";
 static constexpr float TRAIN_SET_RATIO = .7f;
 
@@ -45,6 +47,31 @@ std::list<std::filesystem::path> getDataSetFilesPaths(std::filesystem::path cons
 }
 
 
+cv::Mat getEntryImageData(std::filesystem::path const& entryFilePath)
+{
+    cv::Mat resizedImageData;
+
+    {
+        auto&& imageData = cv::imread(
+                entryFilePath.string(),
+                cv::ImreadModes::IMREAD_GRAYSCALE
+            );
+
+        cv::resize(
+                imageData,
+                resizedImageData,
+                IMAGE_SIZE
+            );
+    }
+
+    return cv::Mat{ resizedImageData.t() }
+        .reshape(
+                1,
+                IMAGE_SIZE.width * IMAGE_SIZE.height
+            );
+}
+
+
 FaceImage readDataSetEntry(std::filesystem::path const& entryFilePath)
 {
     static std::regex const reFileNameFormat{ R"(^(\d+)_(\d+)\.)" };
@@ -61,16 +88,8 @@ FaceImage readDataSetEntry(std::filesystem::path const& entryFilePath)
         return {};
     }
 
-    auto imageData = cv::imread(
-            entryFilePath.string(),
-            cv::ImreadModes::IMREAD_GRAYSCALE
-        );
-
-    if (imageData.empty())
-        return {};
-
     return FaceImage{
-            std::move(imageData),
+            getEntryImageData(entryFilePath),
             std::stoul(fileNameMatching[1]),
             std::stoul(fileNameMatching[2])
         };
