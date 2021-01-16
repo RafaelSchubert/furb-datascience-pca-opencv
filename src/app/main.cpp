@@ -1,8 +1,11 @@
+#include <algorithm>
 #include <filesystem>
 #include <list>
 #include <map>
+#include <random>
 #include <regex>
 #include <string>
+#include <vector>
 
 #include <opencv2/core.hpp>
 #include <opencv2/imgcodecs.hpp>
@@ -18,10 +21,10 @@ static constexpr float TRAIN_SET_RATIO = .7f;
 
 std::list<std::filesystem::path> getDataSetFilesPaths(std::filesystem::path const& dataSetDirectoryPath)
 {
-    static std::regex const reExpectedFileExtensions{
+    static std::regex const reExpectedFileExtensions(
             R"(^\d+_\d+\.j(?:p(?:eg|e|g)|fif?)$)",
             std::regex_constants::ECMAScript | std::regex_constants::icase
-        };
+        );
 
     std::list<std::filesystem::path> dataSetFilesPaths;
 
@@ -64,7 +67,7 @@ cv::Mat getEntryImageData(std::filesystem::path const& entryFilePath)
             );
     }
 
-    return cv::Mat{ resizedImageData.t() }
+    return cv::Mat(resizedImageData.t())
         .reshape(
                 1,
                 IMAGE_SIZE.width * IMAGE_SIZE.height
@@ -74,7 +77,7 @@ cv::Mat getEntryImageData(std::filesystem::path const& entryFilePath)
 
 FaceImage readDataSetEntry(std::filesystem::path const& entryFilePath)
 {
-    static std::regex const reFileNameFormat{ R"(^(\d+)_(\d+)\.)" };
+    static std::regex const reFileNameFormat(R"(^(\d+)_(\d+)\.)");
 
     auto const  fileName = entryFilePath.filename().string();
     std::smatch fileNameMatching;
@@ -96,19 +99,19 @@ FaceImage readDataSetEntry(std::filesystem::path const& entryFilePath)
 }
 
 
-std::list<FaceImage> loadDataSet(std::filesystem::path const& dataSetDirectoryPath)
+std::vector<FaceImage> loadDataSet(std::filesystem::path const& dataSetDirectoryPath)
 {
     auto&& dataSetFilesPaths = getDataSetFilesPaths(dataSetDirectoryPath);
 
     if (empty(dataSetFilesPaths))
         return {};
 
-    std::list<FaceImage> dataSetEntries;
+    std::vector<FaceImage> dataSetEntries(size(dataSetFilesPaths));
 
     std::transform(
             begin(dataSetFilesPaths),
             end(dataSetFilesPaths),
-            std::back_inserter(dataSetEntries),
+            begin(dataSetEntries),
             readDataSetEntry
         );
 
@@ -117,68 +120,81 @@ std::list<FaceImage> loadDataSet(std::filesystem::path const& dataSetDirectoryPa
 
 
 std::pair<
-        std::list<FaceImage*>,
-        std::list<FaceImage*>
+        std::vector<std::reference_wrapper<FaceImage>>,
+        std::vector<std::reference_wrapper<FaceImage>>
     > splitDataSet(
-        std::list<FaceImage>& dataSet,
-        float const           trainRatio
+        std::vector<FaceImage>& dataSet,
+        float const             trainRatio
     )
 {
-    std::list<FaceImage*> trainDataSet;
-    std::list<FaceImage*> testDataSet;
+    std::vector<std::reference_wrapper<FaceImage>> trainSet;
+    std::vector<std::reference_wrapper<FaceImage>> testSet;
+
+    trainSet.reserve(size(dataSet));
+    testSet .reserve(size(dataSet));
 
     {
         std::map<
                 unsigned int,
-                std::list<FaceImage*>
-            > mapEntriesPerClass;
+                std::list<std::reference_wrapper<FaceImage>>
+            > mapClassEntries;
 
         for (auto&& entry : dataSet)
         {
-            auto itClassEntriesPair = mapEntriesPerClass.find(entry.faceId);
+            auto itClassEntriesPair = mapClassEntries.find(entry.faceId);
 
-            if (itClassEntriesPair == end(mapEntriesPerClass))
+            if (itClassEntriesPair == end(mapClassEntries))
             {
-                itClassEntriesPair = mapEntriesPerClass.insert(std::make_pair(
+                itClassEntriesPair = mapClassEntries.insert(std::make_pair(
                         entry.faceId,
-                        std::list<FaceImage*>{}
+                        std::list<std::reference_wrapper<FaceImage>>{}
                     )).first;
             }
 
-            itClassEntriesPair->second.push_back(&entry);
+            itClassEntriesPair->second.emplace_back(entry);
         }
 
-        auto itTrainDataSetInsert = std::back_inserter(trainDataSet);
-        auto itTestDataSetInsert  = std::back_inserter(testDataSet);
+        auto itTrainDataSetInsert = std::back_inserter(trainSet);
+        auto itTestDataSetInsert  = std::back_inserter(testSet);
 
-        for (auto&& [classId, classEntriesPtrs] : mapEntriesPerClass)
+        std::random_device randDev;
+        std::mt19937       numGenerator(randDev());
+
+        for (auto&& [classId, classEntries] : mapClassEntries)
         {
-            if (empty(classEntriesPtrs))
+            if (empty(classEntries))
                 continue;
 
-            std::size_t trainEntriesCount = size(classEntriesPtrs) * trainRatio;
-            auto        splitPoint        = begin(classEntriesPtrs);
+            std::vector<std::reference_wrapper<FaceImage>> shuffledClassEntries(
+                    begin(classEntries),
+                    end(classEntries)
+                );
 
-            for (; trainEntriesCount; --trainEntriesCount)
-                ++splitPoint;
+            std::shuffle(
+                    begin(shuffledClassEntries),
+                    end(shuffledClassEntries),
+                    numGenerator
+                );
+
+            auto itSplitPoint = begin(shuffledClassEntries) + static_cast<std::size_t>(size(shuffledClassEntries) * trainRatio);
 
             std::copy(
-                    begin(classEntriesPtrs),
-                    splitPoint,
+                    begin(shuffledClassEntries),
+                    itSplitPoint,
                     itTrainDataSetInsert
                 );
 
             std::copy(
-                    splitPoint,
-                    end(classEntriesPtrs),
+                    itSplitPoint,
+                    end(shuffledClassEntries),
                     itTestDataSetInsert
                 );
         }
     }
 
     return {
-            std::move(trainDataSet),
-            std::move(testDataSet)
+            std::move(trainSet),
+            std::move(testSet)
         };
 }
 
