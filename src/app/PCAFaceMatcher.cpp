@@ -12,10 +12,36 @@ void PCAFaceMatcher::train(std::vector<std::reference_wrapper<FaceImage>> const&
     if (empty(trainSet))
         return;
 
-    auto differenceMatrix = getDifferenceMatrix(
-            trainSet,
-            getMeanImage(trainSet)
+    auto covariance = getCovarianceMatrix(
+            getDifferenceMatrix(
+                    trainSet,
+                    getMeanImage(trainSet)
+                )
         );
+}
+
+
+cv::Mat PCAFaceMatcher::multiplyMatrices(
+        cv::Mat left,
+        cv::Mat right
+    )
+{
+    cv::Mat resultMatrix = cv::Mat::zeros(
+            left.rows,
+            right.cols,
+            left.type()
+        );
+
+    for (int row = 0; row < left.rows; ++row)
+    {
+        for (int col = 0; col < right.cols; ++col)
+        {
+            for (int element = 0; element < left.cols; ++element)
+                resultMatrix.at<double>(row, col) += left.at<double>(row, element) * right.at<double>(element, col);
+        }
+    }
+
+    return resultMatrix;
 }
 
 
@@ -75,4 +101,13 @@ cv::Mat PCAFaceMatcher::getDifferenceMatrix(
     }
 
     return differenceMatrix;
+}
+
+
+cv::Mat PCAFaceMatcher::getCovarianceMatrix(cv::Mat const& matrix) const
+{
+    return PCAFaceMatcher::multiplyMatrices(
+            matrix.t(),
+            matrix
+        );
 }
