@@ -18,6 +18,11 @@ private:
             cv::Mat right
         );
 
+    static std::pair<
+            cv::Mat,
+            cv::Mat
+        > eigenDecomposition(cv::Mat const& matrix);
+
     cv::Mat getMeanImage(std::vector<std::reference_wrapper<FaceImage>> const& trainSet) const;
 
     cv::Mat getDifferenceMatrix(
