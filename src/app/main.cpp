@@ -1,8 +1,8 @@
 #include <filesystem>
 #include <list>
+#include <map>
 #include <regex>
 #include <string>
-#include <vector>
 
 #include <opencv2/core.hpp>
 #include <opencv2/imgcodecs.hpp>
@@ -96,19 +96,19 @@ FaceImage readDataSetEntry(std::filesystem::path const& entryFilePath)
 }
 
 
-std::vector<FaceImage> loadDataSet(std::filesystem::path const& dataSetDirectoryPath)
+std::list<FaceImage> loadDataSet(std::filesystem::path const& dataSetDirectoryPath)
 {
     auto&& dataSetFilesPaths = getDataSetFilesPaths(dataSetDirectoryPath);
 
     if (empty(dataSetFilesPaths))
         return {};
 
-    std::vector<FaceImage> dataSetEntries{ size(dataSetFilesPaths) };
+    std::list<FaceImage> dataSetEntries;
 
     std::transform(
             begin(dataSetFilesPaths),
             end(dataSetFilesPaths),
-            begin(dataSetEntries),
+            std::back_inserter(dataSetEntries),
             readDataSetEntry
         );
 
@@ -117,14 +117,69 @@ std::vector<FaceImage> loadDataSet(std::filesystem::path const& dataSetDirectory
 
 
 std::pair<
-        std::vector<FaceImage*>,
-        std::vector<FaceImage*>
+        std::list<FaceImage*>,
+        std::list<FaceImage*>
     > splitDataSet(
-        std::vector<FaceImage> const& dataSet,
-        float const                   trainRatio
+        std::list<FaceImage>& dataSet,
+        float const           trainRatio
     )
 {
-    return {};
+    std::list<FaceImage*> trainDataSet;
+    std::list<FaceImage*> testDataSet;
+
+    {
+        std::map<
+                unsigned int,
+                std::list<FaceImage*>
+            > mapEntriesPerClass;
+
+        for (auto&& entry : dataSet)
+        {
+            auto itClassEntriesPair = mapEntriesPerClass.find(entry.faceId);
+
+            if (itClassEntriesPair == end(mapEntriesPerClass))
+            {
+                itClassEntriesPair = mapEntriesPerClass.insert(std::make_pair(
+                        entry.faceId,
+                        std::list<FaceImage*>{}
+                    )).first;
+            }
+
+            itClassEntriesPair->second.push_back(&entry);
+        }
+
+        auto itTrainDataSetInsert = std::back_inserter(trainDataSet);
+        auto itTestDataSetInsert  = std::back_inserter(testDataSet);
+
+        for (auto&& [classId, classEntriesPtrs] : mapEntriesPerClass)
+        {
+            if (empty(classEntriesPtrs))
+                continue;
+
+            std::size_t trainEntriesCount = size(classEntriesPtrs) * trainRatio;
+            auto        splitPoint        = begin(classEntriesPtrs);
+
+            for (; trainEntriesCount; --trainEntriesCount)
+                ++splitPoint;
+
+            std::copy(
+                    begin(classEntriesPtrs),
+                    splitPoint,
+                    itTrainDataSetInsert
+                );
+
+            std::copy(
+                    splitPoint,
+                    end(classEntriesPtrs),
+                    itTestDataSetInsert
+                );
+        }
+    }
+
+    return {
+            std::move(trainDataSet),
+            std::move(testDataSet)
+        };
 }
 
 
