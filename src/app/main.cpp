@@ -53,22 +53,28 @@ std::list<std::filesystem::path> getDataSetFilesPaths(std::filesystem::path cons
 
 cv::Mat getEntryImageData(std::filesystem::path const& entryFilePath)
 {
-    cv::Mat resizedImageData;
+    cv::Mat finalImageData;
 
     {
-        auto imageData = cv::imread(
-                entryFilePath.string(),
-                cv::ImreadModes::IMREAD_GRAYSCALE
-            );
+        cv::Mat resizedImageData;
 
-        cv::resize(
-                imageData,
-                resizedImageData,
-                IMAGE_SIZE
-            );
+        {
+            auto imageData = cv::imread(
+                    entryFilePath.string(),
+                    cv::ImreadModes::IMREAD_GRAYSCALE
+                );
+
+            cv::resize(
+                    imageData,
+                    resizedImageData,
+                    IMAGE_SIZE
+                );
+        }
+
+        resizedImageData.convertTo(finalImageData, CV_64FC1);
     }
 
-    return cv::Mat(resizedImageData.t())
+    return cv::Mat(finalImageData.t())
         .reshape(
                 1,
                 IMAGE_SIZE.width * IMAGE_SIZE.height

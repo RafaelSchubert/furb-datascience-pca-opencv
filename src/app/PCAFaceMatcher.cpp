@@ -23,9 +23,10 @@ cv::Mat PCAFaceMatcher::getMeanImage(std::vector<std::reference_wrapper<FaceImag
 {
     auto&& firstImage = dataSet.front().get().imageData;
 
-    std::vector<unsigned long> pixelsTotals(
-            static_cast<std::size_t>(firstImage.rows) * firstImage.cols,
-            0UL
+    cv::Mat meanImage = cv::Mat::zeros(
+            firstImage.rows,
+            firstImage.cols,
+            firstImage.type()
         );
 
     for (auto&& entryRef : dataSet)
@@ -33,25 +34,19 @@ cv::Mat PCAFaceMatcher::getMeanImage(std::vector<std::reference_wrapper<FaceImag
         auto&& entryImage = entryRef.get().imageData;
 
         std::transform(
-                begin(pixelsTotals),
-                end(pixelsTotals),
-                entryImage.begin<unsigned char>(),
-                begin(pixelsTotals),
+                meanImage.begin<double>(),
+                meanImage.end<double>(),
+                entryImage.begin<double>(),
+                meanImage.begin<double>(),
                 [](auto&& total, auto&& parcel) { return total + parcel; }
             );
     }
 
-    cv::Mat meanImage = cv::Mat::zeros(
-            firstImage.rows,
-            firstImage.cols,
-            CV_8UC1
-        );
-
     std::transform(
-            begin(pixelsTotals),
-            end(pixelsTotals),
-            meanImage.begin<unsigned char>(),
-            [entryCount = size(dataSet)](auto&& total) { return static_cast<unsigned char>(total / entryCount); }
+            meanImage.begin<double>(),
+            meanImage.end<double>(),
+            meanImage.begin<double>(),
+            [entryCount = size(dataSet)](auto&& total) { return total / entryCount; }
         );
 
     return meanImage;
@@ -67,20 +62,16 @@ cv::Mat PCAFaceMatcher::getDifferenceMatrix(
 
     cv::Mat differenceMatrix = cv::Mat::zeros(
             firstImage.rows,
-            size(dataSet),
-            CV_16SC1
+            static_cast<int>(size(dataSet)),
+            firstImage.type()
         );
 
-    for (std::size_t idxEntry = 0; idxEntry < size(dataSet); ++idxEntry)
+    for (int col = 0; col < differenceMatrix.cols; ++col)
     {
-        auto&& entryImageData = dataSet[idxEntry].get().imageData;
+        auto&& entryImageData = dataSet[col].get().imageData;
 
-        for (int row = 0; row < entryImageData.rows; ++row)
-        {
-            differenceMatrix.at<short>(row, idxEntry) =
-                static_cast<short>(entryImageData.at<unsigned char>(row, 0))
-                - meanImage.at<unsigned char>(row, 0);
-        }
+        for (int row = 0; row < differenceMatrix.rows; ++row)
+            differenceMatrix.at<double>(row, col) = entryImageData.at<double>(row, 0) - meanImage.at<double>(row, 0);
     }
 
     return differenceMatrix;
