@@ -2,12 +2,6 @@
 # define FACEIMAGE_H_
 
 
-namespace cv
-{
-    class Mat;
-}
-
-
 struct FaceImage
 {
     cv::Mat      imageData;

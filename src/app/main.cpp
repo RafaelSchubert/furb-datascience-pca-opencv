@@ -12,6 +12,7 @@
 #include <opencv2/imgproc.hpp>
 
 #include "FaceImage.h"
+#include "PCAFaceMatcher.h"
 
 
 static cv::Size const  IMAGE_SIZE{ 80, 80 };
@@ -203,7 +204,11 @@ int main()
 {
     auto&& facesDataSet = loadDataSet(DATA_SET_PATH);
 
-    auto&& [train, test] = splitDataSet(facesDataSet, TRAIN_SET_RATIO);
+    auto&& [trainSet, testSet] = splitDataSet(facesDataSet, TRAIN_SET_RATIO);
+
+    PCAFaceMatcher matcher;
+
+    matcher.train(trainSet);
 
     return 0;
 }

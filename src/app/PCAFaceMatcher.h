@@ -2,8 +2,21 @@
 # define PCAFACEMATCHER_H_
 
 
+struct FaceImage;
+
+
 class PCAFaceMatcher
 {
+public:
+    void train(std::vector<std::reference_wrapper<FaceImage>> const& trainSet);
+
+    void predict(std::vector<std::reference_wrapper<FaceImage>> const& dataSet) const;
+
+private:
+    cv::Mat getMeanImage(std::vector<std::reference_wrapper<FaceImage>> const& trainSet) const;
+
+private:
+    cv::Mat m_projections;
 };
 
 
