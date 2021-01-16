@@ -168,10 +168,12 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="matrixOperations.cpp" />
     <ClCompile Include="PCAFaceMatcher.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="FaceImage.h" />
+    <ClInclude Include="matrixOperations.h" />
     <ClInclude Include="PCAFaceMatcher.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

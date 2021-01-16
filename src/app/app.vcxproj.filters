@@ -15,12 +15,18 @@
     <ClCompile Include="PCAFaceMatcher.cpp">
       <Filter>Source files</Filter>
     </ClCompile>
+    <ClCompile Include="matrixOperations.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="FaceImage.h">
       <Filter>Header files</Filter>
     </ClInclude>
     <ClInclude Include="PCAFaceMatcher.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="matrixOperations.h">
       <Filter>Header files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -5,6 +5,7 @@
 
 #include "PCAFaceMatcher.h"
 #include "FaceImage.h"
+#include "matrixOperations.h"
 
 
 void PCAFaceMatcher::train(std::vector<std::reference_wrapper<FaceImage>> const& trainSet)
@@ -12,59 +13,14 @@ void PCAFaceMatcher::train(std::vector<std::reference_wrapper<FaceImage>> const&
     if (empty(trainSet))
         return;
 
-    auto [eigenValues, eigenVectors] = PCAFaceMatcher::eigenDecomposition(
-            getCovarianceMatrix(
+    auto [eigenValues, eigenVectors] = eigenDecomposition(
+            covarianceMatrix(
                     getDifferenceMatrix(
                             trainSet,
                             getMeanImage(trainSet)
                         )
                 )
         );
-}
-
-
-cv::Mat PCAFaceMatcher::multiplyMatrices(
-        cv::Mat left,
-        cv::Mat right
-    )
-{
-    cv::Mat resultMatrix = cv::Mat::zeros(
-            left.rows,
-            right.cols,
-            left.type()
-        );
-
-    for (int row = 0; row < left.rows; ++row)
-    {
-        for (int col = 0; col < right.cols; ++col)
-        {
-            for (int element = 0; element < left.cols; ++element)
-                resultMatrix.at<double>(row, col) += left.at<double>(row, element) * right.at<double>(element, col);
-        }
-    }
-
-    return resultMatrix;
-}
-
-
-std::pair<
-        cv::Mat,
-        cv::Mat
-    > PCAFaceMatcher::eigenDecomposition(cv::Mat const& matrix)
-{
-    cv::Mat eigenValues;
-    cv::Mat eigenVectors;
-
-    cv::eigen(
-            matrix,
-            eigenValues,
-            eigenVectors
-        );
-
-    return {
-            std::move(eigenValues),
-            std::move(eigenVectors)
-        };
 }
 
 
@@ -124,13 +80,4 @@ cv::Mat PCAFaceMatcher::getDifferenceMatrix(
     }
 
     return differenceMatrix;
-}
-
-
-cv::Mat PCAFaceMatcher::getCovarianceMatrix(cv::Mat const& matrix) const
-{
-    return PCAFaceMatcher::multiplyMatrices(
-            matrix.t(),
-            matrix
-        );
 }
