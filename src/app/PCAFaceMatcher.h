@@ -15,6 +15,11 @@ public:
 private:
     cv::Mat getMeanImage(std::vector<std::reference_wrapper<FaceImage>> const& trainSet) const;
 
+    cv::Mat getDifferenceMatrix(
+            std::vector<std::reference_wrapper<FaceImage>> const& trainSet,
+            cv::Mat const&                                        meanImage
+        ) const;
+
 private:
     cv::Mat m_projections;
 };

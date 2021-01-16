@@ -12,20 +12,23 @@ void PCAFaceMatcher::train(std::vector<std::reference_wrapper<FaceImage>> const&
     if (empty(trainSet))
         return;
 
-    auto meanImage = getMeanImage(trainSet);
+    auto differenceMatrix = getDifferenceMatrix(
+            trainSet,
+            getMeanImage(trainSet)
+        );
 }
 
 
-cv::Mat PCAFaceMatcher::getMeanImage(std::vector<std::reference_wrapper<FaceImage>> const& trainSet) const
+cv::Mat PCAFaceMatcher::getMeanImage(std::vector<std::reference_wrapper<FaceImage>> const& dataSet) const
 {
-    auto&& firstImage = trainSet[0].get().imageData;
+    auto&& firstImage = dataSet.front().get().imageData;
 
     std::vector<unsigned long> pixelsTotals(
             static_cast<std::size_t>(firstImage.rows) * firstImage.cols,
             0UL
         );
 
-    for (auto&& entryRef : trainSet)
+    for (auto&& entryRef : dataSet)
     {
         auto&& entryImage = entryRef.get().imageData;
 
@@ -48,8 +51,37 @@ cv::Mat PCAFaceMatcher::getMeanImage(std::vector<std::reference_wrapper<FaceImag
             begin(pixelsTotals),
             end(pixelsTotals),
             meanImage.begin<unsigned char>(),
-            [entryCount = size(trainSet)](auto&& total) { return static_cast<unsigned char>(total / entryCount); }
+            [entryCount = size(dataSet)](auto&& total) { return static_cast<unsigned char>(total / entryCount); }
         );
 
     return meanImage;
+}
+
+
+cv::Mat PCAFaceMatcher::getDifferenceMatrix(
+        std::vector<std::reference_wrapper<FaceImage>> const& dataSet,
+        cv::Mat const&                                        meanImage
+    ) const
+{
+    auto&& firstImage = dataSet.front().get().imageData;
+
+    cv::Mat differenceMatrix = cv::Mat::zeros(
+            firstImage.rows,
+            size(dataSet),
+            CV_16SC1
+        );
+
+    for (std::size_t idxEntry = 0; idxEntry < size(dataSet); ++idxEntry)
+    {
+        auto&& entryImageData = dataSet[idxEntry].get().imageData;
+
+        for (int row = 0; row < entryImageData.rows; ++row)
+        {
+            differenceMatrix.at<short>(row, idxEntry) =
+                static_cast<short>(entryImageData.at<unsigned char>(row, 0))
+                - meanImage.at<unsigned char>(row, 0);
+        }
+    }
+
+    return differenceMatrix;
 }
