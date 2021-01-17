@@ -2,6 +2,12 @@
 # define MATRIXOPERATIONS_H_
 
 
+cv::Mat subtractMatrices(
+        cv::Mat const& left,
+        cv::Mat const& right
+    );
+
+
 cv::Mat multiplyMatrices(
         cv::Mat const& left,
         cv::Mat const& right

@@ -5,6 +5,25 @@
 #include "matrixOperations.h"
 
 
+cv::Mat subtractMatrices(
+        cv::Mat const& left,
+        cv::Mat const& right
+    )
+{
+    auto resultMatrix = left.clone();
+
+    std::transform(
+            resultMatrix.begin<double>(),
+            resultMatrix.end<double>(),
+            right.begin<double>(),
+            resultMatrix.begin<double>(),
+            [](auto&& leftValue, auto&& rightValue) { return leftValue - rightValue; }
+        );
+
+    return resultMatrix;
+}
+
+
 cv::Mat multiplyMatrices(
         cv::Mat const& left,
         cv::Mat const& right
