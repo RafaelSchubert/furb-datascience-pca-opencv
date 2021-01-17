@@ -1,5 +1,4 @@
 #include <algorithm>
-#include <iostream>
 #include <vector>
 
 #include <opencv2/core.hpp>
@@ -22,7 +21,17 @@ void PCAFaceMatcher::train(std::vector<std::reference_wrapper<FaceImage>> const&
         return;
 
     calculateMeanImage(trainSet);
-    calculateEigenFaces(trainSet);
+
+    auto const differenceMatrix = getDifferenceMatrix(
+            trainSet,
+            m_mean
+        );
+
+    calculateEigenFaces(differenceMatrix);
+    calculateProjections(
+            trainSet,
+            differenceMatrix
+        );
 }
 
 
@@ -31,6 +40,7 @@ void PCAFaceMatcher::clear()
     m_mean        = {};
     m_eigenFaces  = {};
     m_projections = {};
+    m_classes     = {};
 }
 
 
@@ -66,13 +76,8 @@ void PCAFaceMatcher::calculateMeanImage(std::vector<std::reference_wrapper<FaceI
 }
 
 
-void PCAFaceMatcher::calculateEigenFaces(std::vector<std::reference_wrapper<FaceImage>> const& trainSet)
+void PCAFaceMatcher::calculateEigenFaces(cv::Mat const& differenceMatrix)
 {
-    auto differenceMatrix = getDifferenceMatrix(
-            trainSet,
-            m_mean
-        );
-
     auto [eigenValues, eigenVectors] = eigenDecomposition(covarianceMatrix(differenceMatrix));
 
     eigenVectors = eigenVectors.t();
@@ -93,6 +98,33 @@ void PCAFaceMatcher::calculateEigenFaces(std::vector<std::reference_wrapper<Face
                 m_eigenFaces.col(col),
                 m_eigenFaces.col(col)
             );
+    }
+}
+
+
+void PCAFaceMatcher::calculateProjections(
+        std::vector<std::reference_wrapper<FaceImage>> const& trainSet,
+        cv::Mat const&                                        differenceMatrix
+    )
+{
+    m_classes.resize(size(trainSet));
+
+    m_projections = cv::Mat::zeros(
+            m_eigenFaces.cols,
+            static_cast<int>(size(trainSet)),
+            CV_64FC1
+        );
+
+    cv::Mat const transposedEigenFaces = m_eigenFaces.t();
+
+    for (int col = 0; col < m_projections.cols; ++col)
+    {
+        m_classes[col] = trainSet[col].get().faceId;
+
+        multiplyMatrices(
+                transposedEigenFaces,
+                differenceMatrix.col(col)
+            ).copyTo(m_projections.col(col));
     }
 }
 

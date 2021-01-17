@@ -29,7 +29,12 @@ private:
 
     void calculateMeanImage(std::vector<std::reference_wrapper<FaceImage>> const& trainSet);
 
-    void calculateEigenFaces(std::vector<std::reference_wrapper<FaceImage>> const& trainSet);
+    void calculateEigenFaces(cv::Mat const& differenceMatrix);
+
+    void calculateProjections(
+            std::vector<std::reference_wrapper<FaceImage>> const& trainSet,
+            cv::Mat const&                                        differenceMatrix
+        );
 
     cv::Mat getDifferenceMatrix(
             std::vector<std::reference_wrapper<FaceImage>> const& trainSet,
@@ -37,10 +42,11 @@ private:
         );
 
 private:
-    cv::Mat m_mean;
-    cv::Mat m_eigenFaces;
-    cv::Mat m_projections;
-    int     m_numberOfComponents = 0;
+    cv::Mat                   m_mean;
+    cv::Mat                   m_eigenFaces;
+    cv::Mat                   m_projections;
+    std::vector<unsigned int> m_classes;
+    int                       m_numberOfComponents = 0;
 };
 
 
