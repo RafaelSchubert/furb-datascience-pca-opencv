@@ -1,5 +1,6 @@
 #include <algorithm>
 #include <filesystem>
+#include <iostream>
 #include <list>
 #include <map>
 #include <random>
@@ -215,6 +216,23 @@ int main()
     PCAFaceMatcher matcher(5);
 
     matcher.train(trainSet);
+
+    auto correctPredictions = std::count_if(
+            begin(testSet),
+            end(testSet),
+            [&](auto const& entryRef)
+            {
+                auto const& entry = entryRef.get();
+
+                auto [predictedClass, confidenceRate] = matcher.predict(entry);
+
+                return entry.faceId == predictedClass;
+            }
+        );
+
+    auto accuracyRate = static_cast<double>(correctPredictions) / size(testSet);
+
+    std::cout << "Accuracy: " << 100. * accuracyRate << '\n';
 
     return 0;
 }
