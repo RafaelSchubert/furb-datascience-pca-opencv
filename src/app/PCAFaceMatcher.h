@@ -15,12 +15,14 @@ public:
 private:
     void clear();
 
-    cv::Mat getMeanImage(std::vector<std::reference_wrapper<FaceImage>> const& trainSet) const;
+    void calculateMeanImage(std::vector<std::reference_wrapper<FaceImage>> const& trainSet);
+
+    void calculateEigenFaces(std::vector<std::reference_wrapper<FaceImage>> const& trainSet);
 
     cv::Mat getDifferenceMatrix(
             std::vector<std::reference_wrapper<FaceImage>> const& trainSet,
             cv::Mat const&                                        meanImage
-        ) const;
+        );
 
 private:
     cv::Mat m_mean;

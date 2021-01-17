@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <iostream>
 #include <vector>
 
 #include <opencv2/core.hpp>
@@ -15,16 +16,8 @@ void PCAFaceMatcher::train(std::vector<std::reference_wrapper<FaceImage>> const&
     if (empty(trainSet))
         return;
 
-    m_mean = getMeanImage(trainSet);
-
-    auto [eigenValues, eigenVectors] = eigenDecomposition(
-            covarianceMatrix(
-                    getDifferenceMatrix(
-                            trainSet,
-                            m_mean
-                        )
-                )
-        );
+    calculateMeanImage(trainSet);
+    calculateEigenFaces(trainSet);
 }
 
 
@@ -36,11 +29,11 @@ void PCAFaceMatcher::clear()
 }
 
 
-cv::Mat PCAFaceMatcher::getMeanImage(std::vector<std::reference_wrapper<FaceImage>> const& dataSet) const
+void PCAFaceMatcher::calculateMeanImage(std::vector<std::reference_wrapper<FaceImage>> const& dataSet)
 {
     auto&& firstImage = dataSet.front().get().imageData;
 
-    cv::Mat meanImage = cv::Mat::zeros(
+    m_mean = cv::Mat::zeros(
             firstImage.rows,
             firstImage.cols,
             firstImage.type()
@@ -51,29 +44,53 @@ cv::Mat PCAFaceMatcher::getMeanImage(std::vector<std::reference_wrapper<FaceImag
         auto&& entryImage = entryRef.get().imageData;
 
         std::transform(
-                meanImage.begin<double>(),
-                meanImage.end<double>(),
+                m_mean.begin<double>(),
+                m_mean.end<double>(),
                 entryImage.begin<double>(),
-                meanImage.begin<double>(),
+                m_mean.begin<double>(),
                 [](auto&& total, auto&& parcel) { return total + parcel; }
             );
     }
 
     std::transform(
-            meanImage.begin<double>(),
-            meanImage.end<double>(),
-            meanImage.begin<double>(),
+            m_mean.begin<double>(),
+            m_mean.end<double>(),
+            m_mean.begin<double>(),
             [entryCount = size(dataSet)](auto&& total) { return total / entryCount; }
         );
+}
 
-    return meanImage;
+
+void PCAFaceMatcher::calculateEigenFaces(std::vector<std::reference_wrapper<FaceImage>> const& trainSet)
+{
+    auto differenceMatrix = getDifferenceMatrix(
+            trainSet,
+            m_mean
+        );
+
+    auto [eigenValues, eigenVectors] = eigenDecomposition(covarianceMatrix(differenceMatrix));
+
+    eigenVectors = eigenVectors.t();
+
+    m_eigenFaces = multiplyMatrices(
+            differenceMatrix,
+            eigenVectors.colRange(0, std::min(2, eigenValues.rows))
+        );
+
+    for (int col = 0; col < m_eigenFaces.cols; ++col)
+    {
+        cv::normalize(
+                m_eigenFaces.col(col),
+                m_eigenFaces.col(col)
+            );
+    }
 }
 
 
 cv::Mat PCAFaceMatcher::getDifferenceMatrix(
         std::vector<std::reference_wrapper<FaceImage>> const& dataSet,
         cv::Mat const&                                        meanImage
-    ) const
+    )
 {
     auto&& firstImage = dataSet.front().get().imageData;
 
