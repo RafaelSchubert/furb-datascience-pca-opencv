@@ -48,6 +48,33 @@ cv::Mat multiplyMatrices(
 }
 
 
+double matricesDistance(
+        cv::Mat const& left,
+        cv::Mat const& right
+    )
+{
+    auto differenceMatrix = subtractMatrices(
+            left,
+            right
+        );
+
+    cv::pow(
+            differenceMatrix,
+            2.,
+            differenceMatrix
+        );
+
+    auto totalDifference = cv::sum(differenceMatrix);
+
+    cv::sqrt(
+            totalDifference,
+            totalDifference
+        );
+
+    return totalDifference[0];
+}
+
+
 std::pair<
         cv::Mat,
         cv::Mat

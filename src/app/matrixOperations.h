@@ -14,6 +14,12 @@ cv::Mat multiplyMatrices(
     );
 
 
+double matricesDistance(
+        cv::Mat const& left,
+        cv::Mat const& right
+    );
+
+
 cv::Mat covarianceMatrix(cv::Mat const& matrix);
 
 
