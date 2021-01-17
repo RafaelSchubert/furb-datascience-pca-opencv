@@ -37,7 +37,33 @@ void PCAFaceMatcher::train(std::vector<std::reference_wrapper<FaceImage>> const&
 
 unsigned int PCAFaceMatcher::predict(FaceImage const& entry) const
 {
-    return 0;
+    auto entryProjection = multiplyMatrices(
+            m_eigenFaces.t(),
+            subtractMatrices(
+                    entry.imageData,
+                    m_mean
+                )
+        );
+
+    std::vector<double> distances(m_projections.cols, 0);
+
+    for (int col = 0; col < m_projections.cols; ++col)
+    {
+        distances[col] = matricesDistance(
+                entryProjection,
+                m_projections.col(col)
+            );
+    }
+
+    auto itMinDistance = std::min_element(
+            begin(distances),
+            end(distances)
+        );
+
+    return m_classes[std::distance(
+            begin(distances),
+            itMinDistance
+        )];
 }
 
 
