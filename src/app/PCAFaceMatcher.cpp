@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <tuple>
 #include <vector>
 
 #include <opencv2/core.hpp>
@@ -35,7 +36,10 @@ void PCAFaceMatcher::train(std::vector<std::reference_wrapper<FaceImage>> const&
 }
 
 
-unsigned int PCAFaceMatcher::predict(FaceImage const& entry) const
+std::tuple<
+        unsigned int,
+        double
+    > PCAFaceMatcher::predict(FaceImage const& entry) const
 {
     auto entryProjection = multiplyMatrices(
             m_eigenFaces.t(),
@@ -60,10 +64,16 @@ unsigned int PCAFaceMatcher::predict(FaceImage const& entry) const
             end(distances)
         );
 
-    return m_classes[std::distance(
+    auto imageClass = m_classes[std::distance(
             begin(distances),
             itMinDistance
         )];
+    auto confidenceRate = *itMinDistance;
+
+    return {
+            imageClass,
+            confidenceRate
+        };
 }
 
 
