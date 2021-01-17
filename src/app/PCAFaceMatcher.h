@@ -10,7 +10,7 @@ class PCAFaceMatcher
 public:
     PCAFaceMatcher() = default;
 
-    PCAFaceMatcher(int numberOfComponents);
+    PCAFaceMatcher(int const numberOfComponents);
 
     PCAFaceMatcher(PCAFaceMatcher const&) = delete;
     PCAFaceMatcher(PCAFaceMatcher&&)      = delete;

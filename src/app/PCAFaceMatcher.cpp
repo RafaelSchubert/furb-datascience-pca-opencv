@@ -8,7 +8,7 @@
 #include "matrixOperations.h"
 
 
-PCAFaceMatcher::PCAFaceMatcher(int numberOfComponents) :
+PCAFaceMatcher::PCAFaceMatcher(int const numberOfComponents) :
     m_numberOfComponents(numberOfComponents)
 { }
 
