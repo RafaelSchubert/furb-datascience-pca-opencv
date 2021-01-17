@@ -6,6 +6,7 @@
 #include <random>
 #include <regex>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include <opencv2/core.hpp>
@@ -16,9 +17,10 @@
 #include "PCAFaceMatcher.h"
 
 
-static cv::Size const  IMAGE_SIZE{ 80, 80 };
-static constexpr char  DATA_SET_PATH[] = R"(C:\Users\Rafael\Pictures\ORL\)";
-static constexpr float TRAIN_SET_RATIO = .7f;
+static cv::Size const                IMAGE_SIZE{ 80, 80 };
+static constexpr std::pair<int, int> RANGE_OF_COMPONENTS{ 10, 20 };
+static constexpr char                DATA_SET_PATH[] = R"(C:\Users\Rafael\Pictures\ORL\)";
+static constexpr float               TRAIN_SET_RATIO = .7f;
 
 
 std::list<std::filesystem::path> getDataSetFilesPaths(std::filesystem::path const& dataSetDirectoryPath)
@@ -207,13 +209,13 @@ std::pair<
 }
 
 
-int main()
+double scoreRecognition(
+        std::vector<std::reference_wrapper<FaceImage>> const& trainSet,
+        std::vector<std::reference_wrapper<FaceImage>> const& testSet,
+        int const                                             numberOfComponents
+    )
 {
-    auto facesDataSet = loadDataSet(DATA_SET_PATH);
-
-    auto [trainSet, testSet] = splitDataSet(facesDataSet, TRAIN_SET_RATIO);
-
-    PCAFaceMatcher matcher(5);
+    PCAFaceMatcher matcher(numberOfComponents);
 
     matcher.train(trainSet);
 
@@ -230,9 +232,34 @@ int main()
             }
         );
 
-    auto accuracyRate = static_cast<double>(correctPredictions) / size(testSet);
+    return static_cast<double>(correctPredictions) / size(testSet);
+}
 
-    std::cout << "Accuracy: " << 100. * accuracyRate << '\n';
+
+int main()
+{
+    auto facesDataSet = loadDataSet(DATA_SET_PATH);
+
+    auto [trainSet, testSet] = splitDataSet(facesDataSet, TRAIN_SET_RATIO);
+
+    for (
+            int numberOfComponents = RANGE_OF_COMPONENTS.first;
+            numberOfComponents <= RANGE_OF_COMPONENTS.second;
+            ++numberOfComponents
+        )
+    {
+        auto accuracyRate = scoreRecognition(
+                trainSet,
+                testSet,
+                numberOfComponents
+            );
+
+        std::printf(
+                "%i componentes principais, acuracia: %.2f%%.\n",
+                numberOfComponents,
+                100. * accuracyRate
+            );
+    }
 
     return 0;
 }
