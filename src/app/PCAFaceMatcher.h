@@ -22,7 +22,7 @@ public:
 
     void train(std::vector<std::reference_wrapper<FaceImage>> const& trainSet);
 
-    void predict(std::vector<std::reference_wrapper<FaceImage>> const& dataSet) const;
+    unsigned int predict(FaceImage const& entry) const;
 
 private:
     void clear();

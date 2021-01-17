@@ -35,6 +35,12 @@ void PCAFaceMatcher::train(std::vector<std::reference_wrapper<FaceImage>> const&
 }
 
 
+unsigned int PCAFaceMatcher::predict(FaceImage const& entry) const
+{
+    return 0;
+}
+
+
 void PCAFaceMatcher::clear()
 {
     m_mean        = {};
