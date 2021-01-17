@@ -19,7 +19,6 @@
 
 static cv::Size const                IMAGE_SIZE{ 80, 80 };
 static constexpr std::pair<int, int> RANGE_OF_COMPONENTS{ 10, 20 };
-static constexpr char                DATA_SET_PATH[] = R"(C:\Users\Rafael\Pictures\ORL\)";
 static constexpr float               TRAIN_SET_RATIO = .7f;
 
 
@@ -236,9 +235,19 @@ double scoreRecognition(
 }
 
 
-int main()
+int main(int const argc, char const* const argv[])
 {
-    auto facesDataSet = loadDataSet(DATA_SET_PATH);
+    if (argc < 2)
+    {
+        std::cout << "Modo de uso correto:" << '\n';
+        std::cout << "$ pca_face_detection.exe <caminho-diretorio-data-set>" << '\n';
+
+        return 0;
+    }
+
+    std::filesystem::path dataSetDirectoryPath(argv[1]);
+
+    auto facesDataSet = loadDataSet(dataSetDirectoryPath);
 
     auto [trainSet, testSet] = splitDataSet(facesDataSet, TRAIN_SET_RATIO);
 
