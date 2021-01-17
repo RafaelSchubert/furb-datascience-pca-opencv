@@ -212,7 +212,7 @@ int main()
 
     auto [trainSet, testSet] = splitDataSet(facesDataSet, TRAIN_SET_RATIO);
 
-    PCAFaceMatcher matcher;
+    PCAFaceMatcher matcher(5);
 
     matcher.train(trainSet);
 

@@ -9,6 +9,11 @@
 #include "matrixOperations.h"
 
 
+PCAFaceMatcher::PCAFaceMatcher(int numberOfComponents) :
+    m_numberOfComponents(numberOfComponents)
+{ }
+
+
 void PCAFaceMatcher::train(std::vector<std::reference_wrapper<FaceImage>> const& trainSet)
 {
     clear();
@@ -72,9 +77,14 @@ void PCAFaceMatcher::calculateEigenFaces(std::vector<std::reference_wrapper<Face
 
     eigenVectors = eigenVectors.t();
 
+    if (m_numberOfComponents == 0)
+        m_numberOfComponents = eigenVectors.cols;
+    else
+        m_numberOfComponents = std::min(m_numberOfComponents, eigenVectors.cols);
+
     m_eigenFaces = multiplyMatrices(
             differenceMatrix,
-            eigenVectors.colRange(0, std::min(2, eigenValues.rows))
+            eigenVectors.colRange(0, m_numberOfComponents)
         );
 
     for (int col = 0; col < m_eigenFaces.cols; ++col)
