@@ -29,12 +29,12 @@ std::list<std::filesystem::path> getDataSetFilesPaths(std::filesystem::path cons
 
     std::list<std::filesystem::path> dataSetFilesPaths;
 
-    for (auto&& entry : std::filesystem::directory_iterator(dataSetDirectoryPath))
+    for (auto const& entry : std::filesystem::directory_iterator(dataSetDirectoryPath))
     {
         if (!entry.is_regular_file())
             continue;
 
-        auto&& entryPath = entry.path();
+        auto const& entryPath = entry.path();
 
         if (!std::regex_match(
                 entryPath.filename().string(),
@@ -86,7 +86,7 @@ FaceImage readDataSetEntry(std::filesystem::path const& entryFilePath)
 {
     static std::regex const reFileNameFormat(R"(^(\d+)_(\d+)\.)");
 
-    auto const  fileName = entryFilePath.filename().string();
+    auto        fileName = entryFilePath.filename().string();
     std::smatch fileNameMatching;
 
     if (!std::regex_search(
@@ -98,7 +98,7 @@ FaceImage readDataSetEntry(std::filesystem::path const& entryFilePath)
         return {};
     }
 
-    return FaceImage{
+    return {
             getEntryImageData(entryFilePath),
             std::stoul(fileNameMatching[1]),
             std::stoul(fileNameMatching[2])
@@ -146,7 +146,7 @@ std::pair<
                 std::list<std::reference_wrapper<FaceImage>>
             > mapClassEntries;
 
-        for (auto&& entry : dataSet)
+        for (auto& entry : dataSet)
         {
             auto itClassEntriesPair = mapClassEntries.find(entry.faceId);
 
@@ -167,7 +167,7 @@ std::pair<
         std::random_device randDev;
         std::mt19937       numGenerator(randDev());
 
-        for (auto&& [classId, classEntries] : mapClassEntries)
+        for (auto const& [classId, classEntries] : mapClassEntries)
         {
             if (empty(classEntries))
                 continue;

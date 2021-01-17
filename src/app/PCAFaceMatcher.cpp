@@ -22,7 +22,7 @@ void PCAFaceMatcher::train(std::vector<std::reference_wrapper<FaceImage>> const&
 
     calculateMeanImage(trainSet);
 
-    auto const differenceMatrix = getDifferenceMatrix(
+    auto differenceMatrix = getDifferenceMatrix(
             trainSet,
             m_mean
         );
@@ -52,7 +52,7 @@ void PCAFaceMatcher::clear()
 
 void PCAFaceMatcher::calculateMeanImage(std::vector<std::reference_wrapper<FaceImage>> const& dataSet)
 {
-    auto&& firstImage = dataSet.front().get().imageData;
+    auto const& firstImage = dataSet.front().get().imageData;
 
     m_mean = cv::Mat::zeros(
             firstImage.rows,
@@ -60,9 +60,9 @@ void PCAFaceMatcher::calculateMeanImage(std::vector<std::reference_wrapper<FaceI
             firstImage.type()
         );
 
-    for (auto&& entryRef : dataSet)
+    for (auto const& entryRef : dataSet)
     {
-        auto&& entryImage = entryRef.get().imageData;
+        auto const& entryImage = entryRef.get().imageData;
 
         std::transform(
                 m_mean.begin<double>(),
@@ -121,7 +121,7 @@ void PCAFaceMatcher::calculateProjections(
             CV_64FC1
         );
 
-    cv::Mat const transposedEigenFaces = m_eigenFaces.t();
+    cv::Mat transposedEigenFaces = m_eigenFaces.t();
 
     for (int col = 0; col < m_projections.cols; ++col)
     {
@@ -140,7 +140,7 @@ cv::Mat PCAFaceMatcher::getDifferenceMatrix(
         cv::Mat const&                                        meanImage
     )
 {
-    auto&& firstImage = dataSet.front().get().imageData;
+    auto const& firstImage = dataSet.front().get().imageData;
 
     cv::Mat differenceMatrix = cv::Mat::zeros(
             firstImage.rows,
@@ -150,10 +150,12 @@ cv::Mat PCAFaceMatcher::getDifferenceMatrix(
 
     for (int col = 0; col < differenceMatrix.cols; ++col)
     {
-        auto&& entryImageData = dataSet[col].get().imageData;
+        auto const& entryImageData = dataSet[col].get().imageData;
 
-        for (int row = 0; row < differenceMatrix.rows; ++row)
-            differenceMatrix.at<double>(row, col) = entryImageData.at<double>(row, 0) - meanImage.at<double>(row, 0);
+        subtractMatrices(
+                entryImageData,
+                meanImage
+            ).copyTo(differenceMatrix.col(col));
     }
 
     return differenceMatrix;
