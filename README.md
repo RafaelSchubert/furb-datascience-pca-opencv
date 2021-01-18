@@ -10,6 +10,13 @@ A PCA é uma técnica que decompõe a matriz formada pelas características dum 
 ## Recursos
 Optei por desenvolver este projeto em **C++** (padrão **C++17**), usando a IDE **Visual Studio 2019**. Também usei alguns dos recursos da biblioteca [**OpenCV**](https://opencv.org/), uma biblioteca aberta de visão computacional. Um dos requisitos do trabalho final era que tanto quanto possível do passo-a-passo da técnica empregada fosse desenvolvido à mão. Há recursos na OpenCV que facilitariam o desenvolvimento deste trabalho. No entanto, da forma como foi feito, pode-se observar melhor como a técnica funciona.
 
+## Compilando
+Para compilar o projeto, é preciso usar a IDE Visual Studio 2019 (a versão _community edition_ pode ser baixada gratuitamente pela Microsoft) ou versão superior/compatível. Além disso, será necessário baixar e instalar a biblioteca OpenCV (optar pela versão instalável, como foi feito neste projeto). Deve-se configurar uma variável de ambiente chamada `OPENCV_DIR`, apontando para o diretório da biblioteca (por exemplo, `C:\OpenCV\build\x64\vc15`). Com isso feito, será possível compilar o projeto na plataform `x64` (configuração `Debug` ou `Release`) com o Visual Studio, usando a _solution_ em `./src/pca_face_detection.sln`.
+
+### Compilando: Observações
+- Tenha certeza de usar a versão instalável da biblioteca OpenCV;
+- Se não compilar usando o Visual Studio 2019, tenha certeza de que está compilando com o padrão C++17 ou superior.
+
 ## Executando
 O executável compilado está disponível em `./bin/Release-x64/pca_face_detection.exe`. Deve-se executá-lo por linha de comando da seguinte forma:
 
