@@ -24,4 +24,18 @@ O executável compilado está disponível em `./bin/Release-x64/pca_face_detecti
 $ pca_face_detection.exe <caminho-data-set>
 ```
 
-Onde `<caminho-data-set>` é um parâmetro que indica o diretório onde se encontra um _data set_ formado por arquivos `.JPG`, com nomes no formato `<ID-image>_<ID-face>.jpg` (por exemplo, `12_3.jpg` para a imagem de ID 12, que pertence ao rosto de ID 3). Um _data set_ assim está disponível em `./data/data-set.zip`.
+Onde `<caminho-data-set>` é um parâmetro que indica o diretório onde se encontra um _data set_ formado por arquivos `.JPG`, com nomes no formato `<ID-image>_<ID-face>.jpg` (por exemplo, `12_3.jpg` para a imagem de ID 12, que pertence ao rosto de ID 3). Um _data set_ assim está disponível em `./data/data-set.zip`. A execução deve resultar numa saída como a abaixo, executada sobre o _data set_ mencionado.
+
+```
+10 componentes principais, acuracia: 94.31%.
+11 componentes principais, acuracia: 94.31%.
+12 componentes principais, acuracia: 95.12%.
+13 componentes principais, acuracia: 95.12%.
+14 componentes principais, acuracia: 94.31%.
+15 componentes principais, acuracia: 94.31%.
+16 componentes principais, acuracia: 95.12%.
+17 componentes principais, acuracia: 95.12%.
+18 componentes principais, acuracia: 95.93%.
+19 componentes principais, acuracia: 95.93%.
+20 componentes principais, acuracia: 95.93%.
+```
